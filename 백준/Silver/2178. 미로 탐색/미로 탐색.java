@@ -1,68 +1,51 @@
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
-	private static int[] dx = { -1, 1, 0, 0 }; // 상하좌우 방향
-	private static int[] dy = { 0, 0, -1, 1 };
+    private static int[][] maze;
+    private static int N, M;
+    private static int[] dx = {-1, 1, 0, 0};
+    private static int[] dy = {0, 0, -1, 1};
 
-	public static void main(String[] args) {
-		Scanner scanner = new Scanner(System.in);
+    public static int bfs(int startX, int startY) {
+        Queue<int[]> queue = new LinkedList<>();
+        queue.offer(new int[]{startX, startY, 1});
+        maze[startX][startY] = 0;
 
-		int n = scanner.nextInt(); // 행의 개수
-		int m = scanner.nextInt(); // 열의 개수
-		scanner.nextLine(); // 개행 문자(\n) 읽기
+        while (!queue.isEmpty()) {
+            int[] current = queue.poll();
+            int x = current[0], y = current[1], dist = current[2];
 
-		int[][] maze = new int[n][m];
-		for (int i = 0; i < n; i++) {
-			String line = scanner.nextLine();
-			for (int j = 0; j < m; j++) {
-				maze[i][j] = line.charAt(j) - '0';
-			}
-		}
+            if (x == N - 1 && y == M - 1) {
+                return dist;
+            }
 
-		int result = bfs(maze, n, m);
-		System.out.println(result);
+            for (int i = 0; i < 4; i++) {
+                int nx = x + dx[i];
+                int ny = y + dy[i];
 
-		scanner.close();
-	}
+                if (nx >= 0 && nx < N && ny >= 0 && ny < M && maze[nx][ny] == 1) {
+                    queue.offer(new int[]{nx, ny, dist + 1});
+                    maze[nx][ny] = 0;
+                }
+            }
+        }
+        return -1;
+    }
 
-	private static int bfs(int[][] maze, int n, int m) {
-		Queue<int[]> queue = new LinkedList<>();
-		boolean[][] visited = new boolean[n][m];
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        N = sc.nextInt();
+        M = sc.nextInt();
+        sc.nextLine();
 
-		queue.offer(new int[] { 0, 0 }); // 시작 위치 (0, 0) enque
-		visited[0][0] = true;
+        maze = new int[N][M];
+        for (int i = 0; i < N; i++) {
+            String line = sc.nextLine();
+            for (int j = 0; j < M; j++) {
+                maze[i][j] = line.charAt(j) - '0';
+            }
+        }
 
-		while (!queue.isEmpty()) {
-			int[] curr = queue.poll();
-			int x = curr[0];
-			int y = curr[1];
-
-			// 도착 지점에 도달한 경우 현재까지 지나온 칸 수를 반환
-			if (x == n - 1 && y == m - 1) {
-				return maze[x][y];
-			}
-
-			for (int i = 0; i < 4; i++) {
-				int nx = x + dx[i];
-				int ny = y + dy[i];
-
-				// 범위를 벗어난 경우 무시
-				if (nx < 0 || nx >= n || ny < 0 || ny >= m)
-					continue;
-
-				// 이동할 수 없는 칸(0)이거나 이미 방문한 칸인 경우 무시
-				if (maze[nx][ny] == 0 || visited[nx][ny])
-					continue;
-
-				// 현재 칸에서 다음 칸으로 이동할 때 칸 수를 갱신하고, 다음 칸을 큐에 enque
-				maze[nx][ny] = maze[x][y] + 1;
-				visited[nx][ny] = true;
-				queue.offer(new int[] { nx, ny });
-			}
-		}
-
-		return -1; // 도착 지점에 도달하지 못한 경우
-	}
+        System.out.println(bfs(0, 0));
+    }
 }
